@@ -1,10 +1,10 @@
 {
   "name": "kibana-percent-diff",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Kibana percentage difference plugin",
   "main": "index.js",
   "kibana": {
-    "version": "5.5",
+    "version": "5.5.4",
     "templateVersion": "7.0.1"
   },
   "scripts": {
@@ -29,5 +29,8 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.0.1",
     "expect.js": "^0.3.1"
+  },
+  "dependencies": {
+    "ui": "^0.2.4"
   }
 }
