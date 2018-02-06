@@ -9,11 +9,10 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   const dashboardContext = Private(dashboardContextProvider);
 
   $scope.refreshConfig = function () {
-
     indexPatterns.get($scope.vis.params.outputs.indexpattern).then(function (indexPattern) {
       $scope.vis.indexPattern = indexPattern;
+      console.log('Index pattern : ', indexPattern);
     }).then($scope.search);
-
   };
 
   $scope.setDisplay = function (text) {
@@ -36,8 +35,6 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     return base;
   };
 
-  $scope.search();
-
   $scope.search = function () {
 
     const context = dashboardContext();
@@ -48,6 +45,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
       context.bool.must.push(timefilterdsl);
     }
 
+    console.log('Searching ...');
     es.search({
       index: $scope.vis.indexPattern.title,
       body: generateBaseQuery('now-7d/d', [
@@ -62,6 +60,5 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
         console.log('Response', response);
       }
     });
-
   };
 });
