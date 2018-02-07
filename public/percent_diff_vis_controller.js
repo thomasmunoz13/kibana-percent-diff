@@ -7,8 +7,10 @@ const module = uiModules.get('kibana/transform_vis', ['kibana']);
 
 module.controller('PercentDiffVisController', function ($scope, $sce, Private, timefilter, es, config, indexPatterns) {
   const dashboardContext = Private(dashboardContextProvider);
+  console.log('Entering controller');
 
   $scope.refreshConfig = function () {
+    console.log('refreshConfig ...');
     indexPatterns.get($scope.vis.params.outputs.indexpattern).then(function (indexPattern) {
       $scope.vis.indexPattern = indexPattern;
       console.log('Index pattern : ', indexPattern);
@@ -16,41 +18,56 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   };
 
   $scope.setDisplay = function (text) {
+    console.log('setDisplay ...');
     $scope.vis.display = text;
   };
 
   const generateBaseQuery = function (from, filters) {
     const base = {
       query: {
-        filter: [
-          { range: { 'from': from } }
-        ]
+        bool: {
+          must: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: from
+                }
+              }
+            }
+          ]
+        }
       }
     };
 
     if (filters !== undefined) {
-      base.query.filter.concat(filters);
+      base.query.bool.must = base.query.bool.must.concat(filters);
     }
 
     return base;
   };
 
-  $scope.search = function () {
-
+  const search = function () {
     const context = dashboardContext();
-
-    if ($scope.vis.indexPattern && $scope.vis.indexPattern.timeFieldName) {
+    console.log('Context : ', context);
+    /*if ($scope.vis.indexPattern && $scope.vis.indexPattern.timeFieldName) {
       const timefilterdsl = { range: {} };
       timefilterdsl.range[$scope.vis.indexPattern.timeFieldName] = { gte: timefilter.time.from, lte: timefilter.time.to };
       context.bool.must.push(timefilterdsl);
-    }
+    }*/
 
     console.log('Searching ...');
+    console.log('querydsl', $scope.vis.params);
+    console.log('generatedQuery', generateBaseQuery('now-7d/d', [
+      { match: { 'message.Source': 'ga' } },
+      { match: { 'message.Type': 'daily' } }
+    ]));
+
     es.search({
       index: $scope.vis.indexPattern.title,
       body: generateBaseQuery('now-7d/d', [
-        { term: { 'message.Source': 'ga' } },
-        { term: { 'message.Type': 'daily' } }
+        { match: { 'message.Source': 'ga' } },
+        { match: { 'message.Type': 'daily' } }
       ])
     }, function (error, response) {
       if (error) {
@@ -61,4 +78,11 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
       }
     });
   };
+
+  search();
+
+  $scope.$watch('esResponse', function (resp) {
+    console.log('esResponse');
+    console.log(resp);
+  });
 });
