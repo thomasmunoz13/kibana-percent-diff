@@ -47,37 +47,85 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     return base;
   };
 
+  const parseContext = function (context) {
+    const matches = [];
+
+    context.bool.must.forEach(function (elem) {
+      if(elem.match !== undefined) {
+        const match = { match: {} };
+        match.match[Object.keys(elem.match)[0]] = elem.match[Object.keys(elem.match)[0]].query;
+        matches.push(match);
+      }
+    });
+
+    return matches;
+  };
+
+
+  const computeDifference = function (fromResult, toResult) {
+    console.log(fromResult);
+    console.log(toResult);
+    //const fromValue = fromResult.hits[0]._source
+  };
+
   const search = function () {
     const context = dashboardContext();
+
     console.log('Context : ', context);
+    console.log('Parse context : ', parseContext(context));
+
+    const parsedContext = parseContext(context);
+
     /*if ($scope.vis.indexPattern && $scope.vis.indexPattern.timeFieldName) {
       const timefilterdsl = { range: {} };
       timefilterdsl.range[$scope.vis.indexPattern.timeFieldName] = { gte: timefilter.time.from, lte: timefilter.time.to };
       context.bool.must.push(timefilterdsl);
     }*/
 
+
+    const from = parsedContext[parsedContext.length - 2].match['@timestamp'];
+    const to = parsedContext[parsedContext.length - 1].match['@timestamp'];
+
+    const fromQuery = generateBaseQuery(from, parsedContext.slice(0, -2));
+    const toQuery = generateBaseQuery(to, parsedContext.slice(0, -2));
+
+    console.log('[FROM]', fromQuery);
+    console.log('[TO]', toQuery);
+
     console.log('Searching ...');
-    console.log('querydsl', $scope.vis.params);
-    console.log('generatedQuery', generateBaseQuery('now-7d/d', [
-      { match: { 'message.Source': 'ga' } },
-      { match: { 'message.Type': 'daily' } }
-    ]));
+
+    let fromResult;
+
+    let toResult;
 
     es.search({
       index: $scope.vis.indexPattern.title,
-      body: generateBaseQuery('now-7d/d', [
-        { match: { 'message.Source': 'ga' } },
-        { match: { 'message.Type': 'daily' } }
-      ])
+      body: fromQuery
     }, function (error, response) {
       if (error) {
         $scope.setDisplay('Error (See Console)');
         console.log('Elasticsearch Query Error', error);
       } else {
-        console.log('Response', response);
+        fromResult = response;
+        console.log('[FROM] | RESULT', fromResult);
+
+        es.search({
+          index: $scope.vis.indexPattern.title,
+          body: toQuery
+        }, function (error, response) {
+          if (error) {
+            $scope.setDisplay('Error (See Console)');
+            console.log('Elasticsearch Query Error', error);
+          } else {
+            toResult = response;
+            console.log('[TO] | RESULT', toResult);
+            computeDifference(fromResult, toResult);
+          }
+        });
       }
     });
   };
+
 
   search();
 
