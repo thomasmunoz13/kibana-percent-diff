@@ -68,7 +68,14 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     //const fromValue = fromResult.hits[0]._source
   };
 
+  $scope.metric = {};
+  $scope.metric.value = 10;
+  $scope.metric.label = 'Difference';
+
   const search = function () {
+    console.log('Scope vis', $scope.vis);
+    console.log('Metrics : ', $scope.metrics);
+
     const context = dashboardContext();
 
     console.log('Context : ', context);

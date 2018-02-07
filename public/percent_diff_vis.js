@@ -20,6 +20,14 @@ define(function (require) {
       icon: 'fa-area-chart',
       requiresIndexPatternSelection: true,
       template: percentDiffTemplate,
+      params: {
+        defaults: {
+          handleNoResults: true,
+          fontSizePercent: 60,
+          fontSizeCount: 40,
+          displayCount: false
+        }
+      },
       schemas: new Schemas([
         {
           group: 'metrics',
