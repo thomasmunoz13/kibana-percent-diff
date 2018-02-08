@@ -1,24 +1,15 @@
 import { uiModules } from 'ui/modules';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
-
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 
 const module = uiModules.get('kibana/transform_vis', ['kibana']);
 
 
 module.controller('PercentDiffVisController', function ($scope, $sce, Private, timefilter, es, config, indexPatterns) {
+  const tabifyAggResponse = Private(AggResponseTabifyProvider);
   const dashboardContext = Private(dashboardContextProvider);
-  console.log('Entering controller');
-
-  $scope.refreshConfig = function () {
-    console.log('refreshConfig ...');
-    indexPatterns.get($scope.vis.params.outputs.indexpattern).then(function (indexPattern) {
-      $scope.vis.indexPattern = indexPattern;
-      console.log('Index pattern : ', indexPattern);
-    }).then($scope.search);
-  };
 
   $scope.setDisplay = function (text) {
-    console.log('setDisplay ...');
     $scope.vis.display = text;
   };
 
@@ -61,6 +52,10 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     return matches;
   };
 
+  const parseConfig = function (tableGroups) {
+    console.log('Parse Config : ', tableGroups.tables[0].columns);
+  };
+
 
   const computeDifference = function (fromResult, toResult) {
     console.log(fromResult);
@@ -73,22 +68,9 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   $scope.metric.label = 'Difference';
 
   const search = function () {
-    console.log('Scope vis', $scope.vis);
-    console.log('Metrics : ', $scope.metrics);
-
     const context = dashboardContext();
 
-    console.log('Context : ', context);
-    console.log('Parse context : ', parseContext(context));
-
     const parsedContext = parseContext(context);
-
-    /*if ($scope.vis.indexPattern && $scope.vis.indexPattern.timeFieldName) {
-      const timefilterdsl = { range: {} };
-      timefilterdsl.range[$scope.vis.indexPattern.timeFieldName] = { gte: timefilter.time.from, lte: timefilter.time.to };
-      context.bool.must.push(timefilterdsl);
-    }*/
-
 
     const from = parsedContext[parsedContext.length - 2].match['@timestamp'];
     const to = parsedContext[parsedContext.length - 1].match['@timestamp'];
@@ -98,8 +80,6 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
 
     console.log('[FROM]', fromQuery);
     console.log('[TO]', toQuery);
-
-    console.log('Searching ...');
 
     let fromResult;
 
@@ -133,11 +113,25 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     });
   };
 
+  $scope.search = search;
 
   search();
 
+  $scope.refreshConfig = function () {
+    indexPatterns.get($scope.vis.params.outputs.indexpattern).then(function (indexPattern) {
+      $scope.vis.indexPattern = indexPattern;
+    }).then(search);
+  };
+
+  $scope.processTableGroups = function (tableGroups) {
+    parseConfig(tableGroups);
+    console.log('Table Groups : ', tableGroups);
+  };
+
+
   $scope.$watch('esResponse', function (resp) {
-    console.log('esResponse');
-    console.log(resp);
+    if (resp) {
+      $scope.processTableGroups(tabifyAggResponse($scope.vis, resp));
+    }
   });
 });

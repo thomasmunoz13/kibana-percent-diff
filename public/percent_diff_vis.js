@@ -34,10 +34,32 @@ define(function (require) {
           name: 'metric',
           title: 'Element to compare',
           min: 1,
-          max: 1,
-          aggFilter: ['avg'],
+          max: 10,
+          aggFilter: ['count'],
           defaults: [
-            { type: 'avg', schema: 'metric' }
+            { type: 'count', schema: 'metric' }
+          ]
+        },
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'To',
+          min: 1,
+          max: 1,
+          aggFilter: ['count'],
+          defaults: [
+            { type: 'count', schema: 'metric' }
+          ]
+        },
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'From',
+          min: 1,
+          max: 1,
+          aggFilter: ['count'],
+          defaults: [
+            { type: 'count', schema: 'metric' }
           ]
         }
       ])
