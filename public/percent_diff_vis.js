@@ -32,31 +32,8 @@ define(function (require) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Element to compare',
+          title: 'Filter',
           min: 1,
-          max: 10,
-          aggFilter: ['count'],
-          defaults: [
-            { type: 'count', schema: 'metric' }
-          ]
-        },
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: 'To',
-          min: 1,
-          max: 1,
-          aggFilter: ['count'],
-          defaults: [
-            { type: 'count', schema: 'metric' }
-          ]
-        },
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: 'From',
-          min: 1,
-          max: 1,
           aggFilter: ['count'],
           defaults: [
             { type: 'count', schema: 'metric' }

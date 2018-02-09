@@ -4,7 +4,7 @@
   "description": "Kibana percentage difference plugin",
   "main": "index.js",
   "kibana": {
-    "version": "5.5.4",
+    "version": "5.5.3",
     "templateVersion": "7.0.1"
   },
   "scripts": {

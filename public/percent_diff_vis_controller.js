@@ -115,7 +115,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
 
   $scope.search = search;
 
-  search();
+  //search();
 
   $scope.refreshConfig = function () {
     indexPatterns.get($scope.vis.params.outputs.indexpattern).then(function (indexPattern) {
