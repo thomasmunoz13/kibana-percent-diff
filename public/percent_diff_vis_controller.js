@@ -7,10 +7,14 @@ const module = uiModules.get('kibana/transform_vis', ['kibana']);
 
 module.controller('PercentDiffVisController', function ($scope, $sce, Private, timefilter, es, config, indexPatterns) {
   const tabifyAggResponse = Private(AggResponseTabifyProvider);
-  const dashboardContext = Private(dashboardContextProvider);
 
   $scope.setDisplay = function (text) {
     $scope.vis.display = text;
+  };
+
+  const precisionRound = function (number, precision) {
+    const factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
   };
 
   const generateBaseQuery = function (from, filters) {
@@ -38,48 +42,60 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     return base;
   };
 
-  const parseContext = function (context) {
-    const matches = [];
+  const parseConfig = function (tableGroups) {
+    const columns = tableGroups.tables[0].columns;
+    const filters = [];
 
-    context.bool.must.forEach(function (elem) {
-      if(elem.match !== undefined) {
-        const match = { match: {} };
-        match.match[Object.keys(elem.match)[0]] = elem.match[Object.keys(elem.match)[0]].query;
-        matches.push(match);
-      }
+    columns.slice(2).forEach(function (elem) {
+      const elemObj = {};
+      elemObj[elem.title.split(':')[0]] = elem.title.split(':')[1];
+
+      filters.push({
+        match: elemObj
+      });
     });
 
-    return matches;
+    return {
+      from: columns[0].title,
+      to: columns[1].title,
+      filters: filters
+    };
   };
 
-  const parseConfig = function (tableGroups) {
-    console.log('Parse Config : ', tableGroups.tables[0].columns);
+
+  const computeDifference = function (from, to) {
+    const fromValue = from.hits.hits[0]._source.message.Value;
+    const toValue = to.hits.hits[0]._source.message.Value;
+
+    if (fromValue > 0) {
+      return precisionRound((fromValue - toValue) / fromValue * 100, 2);
+    } else {
+      return 0;
+    }
   };
 
-
-  const computeDifference = function (fromResult, toResult) {
-    console.log(fromResult);
-    console.log(toResult);
-    //const fromValue = fromResult.hits[0]._source
+  const displayDifference = function (from, to) {
+    if (from.hits.hits.length > 0 && to.hits.hits.length > 0) {
+      const diff = computeDifference(from, to);
+      $scope.metric.value = diff + '%';
+    } else {
+      $scope.metric.value = 0.0;
+    }
   };
 
   $scope.metric = {};
-  $scope.metric.value = 10;
+  $scope.metric.value = 0.0;
   $scope.metric.label = 'Difference';
 
-  const search = function () {
-    const context = dashboardContext();
 
-    const parsedContext = parseContext(context);
+  const search = function (tableGroup) {
+    const parsedConfig = parseConfig(tableGroup);
 
-    const from = parsedContext[parsedContext.length - 2].match['@timestamp'];
-    const to = parsedContext[parsedContext.length - 1].match['@timestamp'];
+    const from = parsedConfig.from;
+    const to = parsedConfig.to;
 
-    const fromQuery = generateBaseQuery(from, parsedContext.slice(0, -2));
-    const toQuery = generateBaseQuery(to, parsedContext.slice(0, -2));
-
-    console.log('[FROM]', fromQuery);
-    console.log('[TO]', toQuery);
+    const fromQuery = generateBaseQuery(from, parsedConfig.filters);
+    const toQuery = generateBaseQuery(to, parsedConfig.filters);
 
     let fromResult;
 
@@ -91,22 +107,18 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     }, function (error, response) {
       if (error) {
         $scope.setDisplay('Error (See Console)');
-        console.log('Elasticsearch Query Error', error);
       } else {
         fromResult = response;
-        console.log('[FROM] | RESULT', fromResult);
 
         es.search({
           index: $scope.vis.indexPattern.title,
           body: toQuery
         }, function (error, response) {
           if (error) {
-            $scope.setDisplay('Error (See Console)');
             console.log('Elasticsearch Query Error', error);
           } else {
             toResult = response;
-            console.log('[TO] | RESULT', toResult);
-            computeDifference(fromResult, toResult);
+            displayDifference(fromResult, toResult);
           }
         });
       }
@@ -115,8 +127,6 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
 
   $scope.search = search;
 
-  //search();
-
   $scope.refreshConfig = function () {
     indexPatterns.get($scope.vis.params.outputs.indexpattern).then(function (indexPattern) {
       $scope.vis.indexPattern = indexPattern;
@@ -124,8 +134,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   };
 
   $scope.processTableGroups = function (tableGroups) {
-    parseConfig(tableGroups);
-    console.log('Table Groups : ', tableGroups);
+    $scope.search(tableGroups);
   };
 
 
