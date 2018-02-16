@@ -15,7 +15,7 @@ define(function (require) {
 
     return new PercentDiffVisType({
       name: 'percent-diff',
-      title: 'Percent difference',
+      title: '[BETA] Percent difference',
       description: 'Percent difference between two dates',
       icon: 'fa-area-chart',
       requiresIndexPatternSelection: true,
