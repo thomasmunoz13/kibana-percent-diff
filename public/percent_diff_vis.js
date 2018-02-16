@@ -26,7 +26,8 @@ define(function (require) {
           fontSizePercent: 60,
           fontSizeCount: 40,
           displayCount: false
-        }
+        },
+        editor: require('plugins/kibana-percent-diff/percent_diff_vis_params.html')
       },
       schemas: new Schemas([
         {
