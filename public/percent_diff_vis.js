@@ -1,3 +1,5 @@
+import 'plugins/kibana-percent-diff/percent_diff_vis.css';
+
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';

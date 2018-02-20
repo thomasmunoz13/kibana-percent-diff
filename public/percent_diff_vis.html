@@ -1,13 +1,20 @@
 <div ng-controller="PercentDiffVisController" class="metric-vis">
+
     <div class="metric-container">
-        <div ng-if="metric.realValue >= 0"
-                class="metric-value" ng-style="{'font-size': vis.params.fontSizePercent+'pt', color: vis.params.positiveColor}">
+
+        <span ng-if="metric.realValue >= 0"
+                class="metric-value"
+                ng-style="{'font-size': vis.params.fontSizePercent+'pt', color: vis.params.positiveColor}">
             {{ metric.value }}
-        </div>
-        <div ng-if="metric.realValue < 0"
-             class="metric-value"  ng-style="{'font-size': vis.params.fontSizePercent+'pt', color: vis.params.negativeColor }">
+        </span>
+
+        <span ng-if="metric.realValue < 0"
+             class="metric-value"
+             ng-style="{'font-size': vis.params.fontSizePercent+'pt', color: vis.params.negativeColor }">
             {{ metric.value }}
-        </div>
+        </span>
+
         <div>{{metric.label}}</div>
     </div>
+
 </div>
