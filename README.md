@@ -1,10 +1,12 @@
-# kibana-percent-diff
+# Kibana Percentage Difference
 
-> Kibana percentage difference plugin
+**Warning** : this is still a *work in progress*, it fits my need and may not work on your data.
 
----
+Currently working for Kibana 5.5.0
 
-## development
+Please feel free to contact me if you find any bug/bad practices, it's my first Kibana visualization.
+
+## Development
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment. Once you have completed that, use the following npm tasks.
 
