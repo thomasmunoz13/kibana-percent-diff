@@ -77,6 +77,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   const displayDifference = function (from, to) {
     if (from.hits.hits.length > 0 && to.hits.hits.length > 0) {
       const diff = computeDifference(from, to);
+      $scope.metric.realValue = diff;
       $scope.metric.value = diff + '%';
     } else {
       $scope.metric.value = 0.0;
@@ -84,6 +85,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   };
 
   $scope.metric = {};
+  $scope.metric.realValue = 0.0;
   $scope.metric.value = 0.0;
   $scope.metric.label = 'Difference';
 
