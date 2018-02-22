@@ -1,12 +1,8 @@
-import { uiModules } from 'ui/modules';
-import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
-import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
-
-const module = uiModules.get('kibana/transform_vis', ['kibana']);
+const module = require('ui/modules').get('kibana/percent_diff_vis', ['kibana']);
 
 
 module.controller('PercentDiffVisController', function ($scope, $sce, Private, timefilter, es, config, indexPatterns) {
-  const tabifyAggResponse = Private(AggResponseTabifyProvider);
+  const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
   $scope.metric = {};
   $scope.metric.realValue = 0.0;
