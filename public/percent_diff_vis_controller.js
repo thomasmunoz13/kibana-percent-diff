@@ -8,6 +8,12 @@ const module = uiModules.get('kibana/transform_vis', ['kibana']);
 module.controller('PercentDiffVisController', function ($scope, $sce, Private, timefilter, es, config, indexPatterns) {
   const tabifyAggResponse = Private(AggResponseTabifyProvider);
 
+  $scope.metric = {};
+  $scope.metric.realValue = 0.0;
+  $scope.metric.value = 0.0;
+  $scope.metric.label = 'Difference';
+
+
   $scope.setDisplay = function (text) {
     $scope.vis.display = text;
   };
@@ -62,7 +68,6 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     };
   };
 
-
   const computeDifference = function (from, to) {
     const fromValue = from.hits.hits[0]._source.message.Value;
     const toValue = to.hits.hits[0]._source.message.Value;
@@ -84,12 +89,6 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     }
   };
 
-  $scope.metric = {};
-  $scope.metric.realValue = 0.0;
-  $scope.metric.value = 0.0;
-  $scope.metric.label = 'Difference';
-
-
   const search = function (tableGroup) {
     const parsedConfig = parseConfig(tableGroup);
 
@@ -109,6 +108,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     }, function (error, response) {
       if (error) {
         $scope.setDisplay('Error (See Console)');
+        console.error(error);
       } else {
         fromResult = response;
 
@@ -117,7 +117,8 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
           body: toQuery
         }, function (error, response) {
           if (error) {
-            console.log('Elasticsearch Query Error', error);
+            $scope.setDisplay('Error (See Console)');
+            console.error(error);
           } else {
             toResult = response;
             displayDifference(fromResult, toResult);
@@ -138,7 +139,6 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   $scope.processTableGroups = function (tableGroups) {
     $scope.search(tableGroups);
   };
-
 
   $scope.$watch('esResponse', function (resp) {
     if (resp) {
