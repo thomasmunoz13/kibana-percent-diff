@@ -69,7 +69,7 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
     const toValue = to.hits.hits[0]._source.message.Value;
 
     if (fromValue > 0) {
-      return precisionRound((fromValue - toValue) / fromValue * 100, 2);
+      return precisionRound((toValue - fromValue) / fromValue * 100, 2);
     } else {
       return 0;
     }
