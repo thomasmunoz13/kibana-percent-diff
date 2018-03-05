@@ -65,14 +65,34 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   };
 
   const computeDifference = function (from, to) {
-    const fromValue = from.hits.hits[0]._source.message.Value;
-    const toValue = to.hits.hits[0]._source.message.Value;
+    let prop = 'Value';
 
-    if (fromValue > 0) {
-      return precisionRound((toValue - fromValue) / fromValue * 100, 2);
-    } else {
-      return 0;
+    if($scope.vis.params.prop !== '' && $scope.vis.params.prop !== null && $scope.vis.params.prop !== undefined) {
+      prop = $scope.vis.params.prop;
     }
+
+    let fromValue = 0;
+    let toValue = 0;
+
+    for (let i = 0; i < from.hits.hits.length; ++i) {
+      if (from.hits.hits[i]._source.message[prop] !== undefined) {
+        fromValue = from.hits.hits[i]._source.message[prop];
+        break;
+      }
+    }
+
+    for (let i = 0; i < to.hits.hits.length; ++i) {
+      if (to.hits.hits[i]._source.message[prop] !== undefined) {
+        toValue = to.hits.hits[i]._source.message[prop];
+        break;
+      }
+    }
+
+    if (fromValue === 0 && toValue !== 0) {
+      return toValue > 0 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+    }
+
+    return precisionRound((toValue - fromValue) / fromValue * 100, 2);
   };
 
   const displayDifference = function (from, to) {
