@@ -20,6 +20,8 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
   };
 
   const generateBaseQuery = function (from, filters) {
+    const f = from.split(' ').join('').split('to');
+
     const base = {
       query: {
         bool: {
@@ -27,8 +29,8 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
             {
               range: {
                 '@timestamp': {
-                  gte: from,
-                  lte: from
+                  gte: f[0],
+                  lte: f[f.length - 1]
                 }
               }
             }
