@@ -90,20 +90,29 @@ module.controller('PercentDiffVisController', function ($scope, $sce, Private, t
       }
     }
 
-    if (fromValue === 0 && toValue !== 0) {
-      return toValue > 0 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+    if($scope.vis.params.percentage) {
+      if (fromValue === 0 && toValue !== 0) {
+        return toValue > 0 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+      }
+
+      return precisionRound((toValue - fromValue) / fromValue * 100, 2);
     }
 
-    return precisionRound((toValue - fromValue) / fromValue * 100, 2);
+    return precisionRound(toValue - fromValue, 2);
   };
 
   const displayDifference = function (from, to) {
+    console.log('Percentage : ', $scope.vis.params.percentage);
     if (from.hits.hits.length > 0 && to.hits.hits.length > 0) {
       const diff = computeDifference(from, to);
       $scope.metric.realValue = diff;
-      $scope.metric.value = diff + '%';
+      $scope.metric.value = diff;
+
+      if($scope.vis.params.percentage) {
+        $scope.metric.value += '%';
+      }
     } else {
-      $scope.metric.value = 0.0;
+      $scope.metric.value = '?';
     }
   };
 
